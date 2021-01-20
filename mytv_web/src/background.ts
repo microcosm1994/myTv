@@ -17,9 +17,10 @@ async function createWindow() {
   const win = new BrowserWindow({
     width: 350,
     height: 500,
-    backgroundColor: '#2e2c29',
+    backgroundColor: '#fff',
     skipTaskbar: true,
     titleBarStyle: 'hidden',
+    closable: true,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info

@@ -31,6 +31,17 @@ export default defineComponent({
     .btn{
         padding-top: 20px;
         text-align: center;
+        .el-button--primary{
+            background: #e95022;
+            outline: none;
+            border: none;
+            &:hover{
+                background: #da4c21;
+            }
+            &:active{
+                background: #e95022;
+            }
+        }
     }
 }
 </style>
