@@ -1,4 +1,5 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
+import VueCompositionApi from "@vue/composition-api"
 import App from './App.vue'
 import router from './router'
 import store from './store'

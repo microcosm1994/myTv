@@ -1,12 +1,12 @@
-import { remote, BrowserWindow } from 'electron'
+import {remote, BrowserWindow} from 'electron'
 
 // 设置窗口大小
 export const setSize = (w: number, h: number) => {
-  remote.getCurrentWindow().setSize(w, h)
+    remote.getCurrentWindow().setSize(w, h)
 }
 
 // 关闭当前窗口
 export const close = () => {
-  console.log(1)
-  remote.getCurrentWindow().close()
+    console.log(1)
+    remote.getCurrentWindow().close()
 }
