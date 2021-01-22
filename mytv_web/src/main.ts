@@ -1,9 +1,9 @@
 import {createApp} from 'vue'
-import VueCompositionApi from "@vue/composition-api"
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import installElementPlus from './plugins/element'
+import '@/assets/css/public.css'
 
 const app = createApp(App)
 installElementPlus(app)

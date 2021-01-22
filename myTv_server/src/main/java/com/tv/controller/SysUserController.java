@@ -5,7 +5,6 @@ import com.tv.entity.SysUserDto;
 import com.google.code.kaptcha.Constants;
 import com.tv.service.SysUserService;
 import com.tv.utils.Result;
-import javafx.geometry.Pos;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class SysUserController {
     @Resource
     private SysUserService sysUserService;
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login")
     public ResultDto login(@RequestBody Map<String, String> loginInfo) {
         // 获取session中的验证码
         Object kaptchaSessionCode = session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
@@ -47,8 +46,9 @@ public class SysUserController {
         }
     }
 
-    @PostMapping("/register")
-    public ResultDto register(SysUserDto userInfo){
+    @PostMapping(value = "/register")
+    public ResultDto register(@RequestBody SysUserDto userInfo){
+        System.out.print(userInfo);
         int num = sysUserService.register(userInfo);
         if (num > 0) {
             return Result.genSuccessResult();
