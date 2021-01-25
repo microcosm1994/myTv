@@ -31,6 +31,16 @@
               autocomplete="off"
             ></el-input>
           </el-form-item>
+          <el-form-item label="验证码" prop="code">
+            <el-input
+              style="width: 40%;"
+              v-model="ruleForm.code"
+              autocomplete="off"
+            ></el-input>
+            <div class="verifyCode" @click="getVerifyCode">
+              <img ref="verifyImg" src="/api/verify/getCode" alt="" />
+            </div>
+          </el-form-item>
         </el-form>
       </div>
       <div class="btn">
@@ -52,30 +62,36 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
-import { useStore } from 'vuex';
-import { register } from '@/http/api/user';
+// import { useStore } from 'vuex';
+import UseForm from '@/utils/form';
+import UseVerifImg from '@/utils/UseVerifImg';
+// import { register } from '@/http/api/user';
 interface RuleForm {
   userName: string;
   passWord: string;
   checkPass: string;
+  code: string;
 }
 interface Rules {
-  userName: any;
-  passWord: any;
-  checkPass: any;
+  userName: Array<object>;
+  passWord: Array<object>;
+  checkPass: Array<object>;
+  code: Array<object>;
 }
 export default defineComponent({
   name: 'Login',
   setup() {
-    const formRef: any = ref(null);
-    const store = useStore();
+    // const store = useStore();
     const ruleForm: RuleForm = reactive({
       userName: '',
       passWord: '',
-      checkPass: ''
+      checkPass: '',
+      code: ''
     });
+    // 实例化form表单
+    const { formRef, validate, resetForm } = UseForm.Instance();
     // 密码验证
-    const validatePass = (rule: any, value: string, callback: Function) => {
+    const validatePass = (rule, value: string, callback: Function) => {
       if (value === '') {
         callback(new Error('请输入密码'));
       } else {
@@ -86,7 +102,7 @@ export default defineComponent({
       }
     };
     // 密码验证
-    const validatePass2 = (rule: any, value: string, callback: Function) => {
+    const validatePass2 = (rule, value: string, callback: Function) => {
       if (value === '') {
         callback(new Error('请再次输入密码'));
       } else if (value !== ruleForm.passWord) {
@@ -104,34 +120,28 @@ export default defineComponent({
       checkPass: [
         { required: true, message: '请再次输入密码', trigger: 'blur' },
         { validator: validatePass2, trigger: 'blur' }
-      ]
+      ],
+      code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
     });
 
     // 提交表单
     const submitForm = () => {
-      formRef.value.validate((valid: boolean) => {
-        if (valid) {
-          register(ruleForm).then((res) => {
-            console.log(res);
-          });
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      });
+      console.log(validate());
     };
-    // 重置
-    const resetForm = () => {
-      formRef.value.resetFields();
-      console.log(store.getters.token);
-    };
+
+    /**
+     * 验证码
+     */
+    const { getVerifyCode, verifyImg } = UseVerifImg.Instance();
 
     return {
       ruleForm,
       rules,
       formRef,
       submitForm,
-      resetForm
+      resetForm,
+      getVerifyCode,
+      verifyImg
     };
   }
 });
@@ -151,6 +161,18 @@ export default defineComponent({
   }
   .form {
     width: 240px;
+  }
+  .verifyCode {
+    width: 55%;
+    height: 30px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    margin-left: 2%;
+    img {
+      width: 100%;
+      height: 100%;
+    }
   }
   .btn {
     padding-top: 20px;

@@ -44,79 +44,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, reactive } from 'vue';
 import { useStore } from 'vuex';
-import { register } from '@/http/api/user';
+import UseForm from '@/utils/form';
 interface RuleForm {
   userName: string;
   passWord: string;
-  checkPass: string;
 }
 interface Rules {
-  userName: any;
-  passWord: any;
-  checkPass: any;
+  userName: Array<object>;
+  passWord: Array<object>;
 }
 export default defineComponent({
   name: 'Login',
   setup() {
-    const formRef: any = ref(null);
     const store = useStore();
+    console.log(store);
     const ruleForm: RuleForm = reactive({
       userName: '',
-      passWord: '',
-      checkPass: ''
+      passWord: ''
     });
-    // 密码验证
-    const validatePass = (rule: any, value: string, callback: Function) => {
-      if (value === '') {
-        callback(new Error('请输入密码'));
-      } else {
-        if (ruleForm.checkPass !== '') {
-          formRef.value.validateField('checkPass');
-        }
-        callback();
-      }
-    };
-    // 密码验证
-    const validatePass2 = (rule: any, value: string, callback: Function) => {
-      if (value === '') {
-        callback(new Error('请再次输入密码'));
-      } else if (value !== ruleForm.passWord) {
-        callback(new Error('两次输入密码不一致!'));
-      } else {
-        callback();
-      }
-    };
+    // 实例化form表单
+    const { formRef, validate, resetForm } = UseForm.Instance();
     const rules: Rules = reactive({
       userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-      passWord: [
-        { required: true, message: '请输入密码', trigger: 'blur' },
-        { validator: validatePass, trigger: 'blur' }
-      ],
-      checkPass: [
-        { required: true, message: '请再次输入密码', trigger: 'blur' },
-        { validator: validatePass2, trigger: 'blur' }
-      ]
+      passWord: [{ required: true, message: '请输入密码', trigger: 'blur' }]
     });
 
     // 提交表单
     const submitForm = () => {
-      formRef.value.validate((valid: boolean) => {
-        if (valid) {
-          register(ruleForm).then((res) => {
-            console.log(res);
-          });
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      });
-    };
-    // 重置
-    const resetForm = () => {
-      formRef.value.resetFields();
-      console.log(store.getters.token);
+      if (validate()) {
+        console.log('1');
+      }
     };
 
     return {
