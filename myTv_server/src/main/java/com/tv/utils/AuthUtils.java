@@ -28,6 +28,7 @@ public class AuthUtils {
      */
     public static String setToken(String token, SysUserDto userInfo) {
         Map tokenVal = new HashMap();
+        tokenVal.put("id", userInfo.getId());
         tokenVal.put("userName", userInfo.getUserName());
         String jsonTokenValue = JSON.toJSONString(tokenVal);
         return jsonTokenValue;

@@ -15,10 +15,11 @@
           size="mini"
         >
           <el-form-item label="用户名" prop="userName">
-            <el-input v-model.number="ruleForm.userName"></el-input>
+            <el-input v-model.number="ruleForm.userName" clearable></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="passWord">
             <el-input
+              clearable
               type="password"
               v-model="ruleForm.passWord"
               autocomplete="off"
@@ -26,6 +27,7 @@
           </el-form-item>
           <el-form-item label="确认密码" prop="checkPass">
             <el-input
+              clearable
               type="password"
               v-model="ruleForm.checkPass"
               autocomplete="off"
@@ -33,9 +35,11 @@
           </el-form-item>
           <el-form-item label="验证码" prop="code">
             <el-input
-              style="width: 40%;"
+              clearable
+              style="width: 50%;"
               v-model="ruleForm.code"
               autocomplete="off"
+              maxlength="4"
             ></el-input>
             <div class="verifyCode" @click="getVerifyCode">
               <img ref="verifyImg" src="/api/verify/getCode" alt="" />
@@ -61,11 +65,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, getCurrentInstance, reactive } from 'vue';
 // import { useStore } from 'vuex';
-import UseForm from '@/utils/form';
-import UseVerifImg from '@/utils/UseVerifImg';
-// import { register } from '@/http/api/user';
+import cryptoMd5 from 'crypto-js/md5';
+import UseForm from '@/utils/UseForm';
+import UseVerifyImg from '@/utils/UseVerifyImg';
+import { register } from '@/http/api/user';
 interface RuleForm {
   userName: string;
   passWord: string;
@@ -81,6 +86,9 @@ interface Rules {
 export default defineComponent({
   name: 'Login',
   setup() {
+    // 获取全局实例
+    const { ctx }: any = getCurrentInstance();
+
     // const store = useStore();
     const ruleForm: RuleForm = reactive({
       userName: '',
@@ -123,16 +131,32 @@ export default defineComponent({
       ],
       code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
     });
-
     // 提交表单
     const submitForm = () => {
-      console.log(validate());
+      if (validate()) {
+        register({
+          userName: ruleForm.userName,
+          passWord: cryptoMd5(encodeURI(ruleForm.passWord)).toString(),
+          code: ruleForm.code
+        }).then((res: any) => {
+          if (res.code === 1) {
+            console.log(res);
+          }
+          ctx.$notify({
+            title: '注册结果',
+            message: res.msg,
+            position: 'bootom-right',
+            duration: 0,
+            type: res.code === 1 ? 'success' : 'error'
+          });
+        });
+      }
     };
 
     /**
      * 验证码
      */
-    const { getVerifyCode, verifyImg } = UseVerifImg.Instance();
+    const { getVerifyCode, verifyImg } = UseVerifyImg.Instance();
 
     return {
       ruleForm,
@@ -148,7 +172,7 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 .rigster {
-  width: 240px;
+  width: 300px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -160,10 +184,10 @@ export default defineComponent({
     line-height: 70px;
   }
   .form {
-    width: 240px;
+    width: 280px;
   }
   .verifyCode {
-    width: 55%;
+    width: 47%;
     height: 30px;
     display: inline-block;
     vertical-align: middle;

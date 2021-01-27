@@ -17,6 +17,8 @@ public class TvWebMvcConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         List<String> excludePathList = new ArrayList<>();
+        excludePathList.add("/user/login");
+        excludePathList.add("/user/logout");
         excludePathList.add("/user/register");
         excludePathList.add("/verify/getCode");
         registry.addInterceptor(adminInterceptor).excludePathPatterns(excludePathList);

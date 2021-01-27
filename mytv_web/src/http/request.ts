@@ -1,5 +1,8 @@
 import axios from 'axios';
 import store from '@/store';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const service = axios.create({
   baseURL: '/api',
@@ -10,7 +13,7 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     if (store.getters.token) {
-      config.headers['token'] = store.state.user.token;
+      config.headers['token'] = store.getters.token;
     }
     if (config.method === 'get') {
       for (const key in config.params) {
@@ -29,23 +32,20 @@ service.interceptors.request.use(
 // response
 service.interceptors.response.use(
   (response) => {
-    // const res = response.data;
+    const res = response.data;
     switch (response.status) {
       case 401:
-        store.dispatch('user/logout').then(() => {
-          location.reload();
-        });
+        store.dispatch('user/logout');
         break;
       default:
         break;
     }
-    return response;
+    return res;
   },
   (error) => {
     if (error.message.includes('401')) {
-      store.dispatch('user/logout').then(() => {
-        location.reload();
-      });
+      store.dispatch('logout');
+      router.push('/');
       return false;
     } else {
       return Promise.reject(error);

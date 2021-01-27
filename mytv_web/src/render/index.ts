@@ -7,6 +7,5 @@ export const setSize = (w: number, h: number) => {
 
 // 关闭当前窗口
 export const close = () => {
-    console.log(1)
     remote.getCurrentWindow().close()
 }

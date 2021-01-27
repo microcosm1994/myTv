@@ -2,21 +2,21 @@
   <div class="start">
     <Fire />
     <div class="btn">
-      <el-button size="small" type="primary" @click="setWindowSize"
+      <el-button size="small" type="primary"
         ><router-link to="/login">登陆</router-link></el-button
       >
-      <el-button size="small" type="primary" @click="toRigster"
-        ><router-link to="/rigster">注册</router-link></el-button
+      <el-button size="small" type="primary" @click="toRegister"
+        ><router-link to="/register">注册</router-link></el-button
       >
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { setSize } from '../render';
-import Fire from '../components/fire.vue';
+import store from '@/store';
+import Fire from '@/components/fire.vue';
 
 export default defineComponent({
   name: 'Start',
@@ -25,18 +25,19 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    // 设置窗口大小
-    const setWindowSize = async () => {
-      setSize(1000, 500);
-    };
     // 跳转到注册页
-    const toRigster = async () => {
-      router.push('/rigster');
+    const toRegister = async () => {
+      router.push('/register');
     };
+    // 生命周期
+    onMounted(() => {
+      if (store.getters.token) {
+        router.push('/home');
+      }
+    });
 
     return {
-      setWindowSize,
-      toRigster
+      toRegister
     };
   }
 });
@@ -58,7 +59,7 @@ export default defineComponent({
       &:active {
         background: #e95022;
       }
-      a{
+      a {
         color: #fff;
       }
     }

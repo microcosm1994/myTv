@@ -31,7 +31,7 @@ public class SysUserService {
             String jsonTokenValue = AuthUtils.setToken(token, user);
             Jedis jedis = jedisPool.getResource();
             jedis.select(0);
-            jedis.setex(token, 3600 * 12, jsonTokenValue);
+            jedis.setex(token, 3600 * 24 * 30, jsonTokenValue);
             return token;
         } else {
             return "";
@@ -53,7 +53,7 @@ public class SysUserService {
      */
     public SysUserDto getUser(String userName) {
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("userName", userName);
+        queryWrapper.eq("user_name", userName);
         SysUserDto user = sysUserDao.selectOne(queryWrapper);
         return user;
     }

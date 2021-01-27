@@ -1,5 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import Home from '../views/Home.vue';
+import { createRouter, RouteRecordRaw, createWebHashHistory } from 'vue-router';
 import Start from '../views/Start.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -9,35 +8,31 @@ const routes: Array<RouteRecordRaw> = [
     component: Start
   },
   {
-    path: '/rigster',
-    name: 'Rigster',
-    component: () =>
-      import(/* webpackChunkName: "rigster" */ '../views/Rigster.vue')
+    path: '/register',
+    name: 'Register',
+    component: () => import(/* 注册页: "register" */ '../views/Register.vue')
   },
   {
     path: '/login',
     name: 'Login',
-    component: () =>
-      import(/* webpackChunkName: "login" */ '../views/Login.vue')
+    component: () => import(/* 登录页: "login" */ '../views/Login.vue')
   },
   {
     path: '/home',
     name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ '../views/About.vue')
+    component: () => import(/* home页: "home" */ '../views/Home.vue'),
+    children: [
+      {
+        path: '',
+        name: 'About',
+        component: () => import(/* about页: "about" */ '../views/About.vue'),
+      }
+    ]
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
   routes
 });
 

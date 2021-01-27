@@ -3,7 +3,7 @@ import { ref } from 'vue';
 /**
  * 验证码
  */
-export default class UseVerifImg {
+export default class UseVerifyImg {
   // 验证码图片dom
   private verifyImg: any = ref(null);
 
@@ -16,7 +16,7 @@ export default class UseVerifImg {
 
   // 实例化
   static Instance() {
-    const verifyImgInstance = new UseVerifImg();
+    const verifyImgInstance = new UseVerifyImg();
 
     return {
       verifyImg: verifyImgInstance.verifyImg,

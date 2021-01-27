@@ -1,5 +1,6 @@
 package com.tv.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tv.entity.ResultDto;
 import com.tv.entity.SysUserDto;
 import com.google.code.kaptcha.Constants;
@@ -7,9 +8,12 @@ import com.tv.service.SysUserService;
 import com.tv.utils.Result;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +28,8 @@ public class SysUserController {
     private HttpSession session;
     @Resource
     private SysUserService sysUserService;
+    @Resource
+    private JedisPool jedisPool;
 
     @PostMapping(value = "/login")
     public ResultDto login(@RequestBody Map<String, String> loginInfo) {
@@ -47,13 +53,53 @@ public class SysUserController {
     }
 
     @PostMapping(value = "/register")
-    public ResultDto register(@RequestBody SysUserDto userInfo){
-        System.out.print(userInfo);
-        int num = sysUserService.register(userInfo);
-        if (num > 0) {
-            return Result.genSuccessResult();
-        } else{
-            return Result.genErrorResult();
+    public ResultDto register(@RequestBody Map<String, String> userInfo) {
+        // 获取session中的验证码
+        Object kaptchaSessionCode = session.getAttribute(Constants.KAPTCHA_SESSION_KEY);
+        // 比对验证码
+        if (userInfo.get("code").equals(kaptchaSessionCode)) {
+            SysUserDto user = new SysUserDto();
+            user.setUserName(userInfo.get("userName"));
+            user.setNickName(userInfo.get("nickName"));
+            user.setPassWord(userInfo.get("passWord"));
+            int num = sysUserService.register(user);
+            if (num > 0) {
+                return Result.genSuccessResult();
+            } else {
+                return Result.genErrorResult();
+            }
+        } else {
+            return Result.genErrorResult("验证码错误");
         }
+    }
+
+    @GetMapping(value = "/get")
+    public ResultDto getUser() {
+        String token = request.getHeader("token");
+        Jedis jedis = jedisPool.getResource();
+        jedis.select(0);
+        String tokenValue = jedis.get(token);
+        String userName = JSONObject.parseObject(tokenValue).getString("userName");
+        // 获取用户数据
+        SysUserDto user = sysUserService.getUser(userName);
+        if (user != null) {
+            Map data = new HashMap();
+            data.put("userName", user.getUserName());
+            data.put("nickName", user.getNickName());
+            return Result.genSuccessResult(data);
+        } else {
+            return Result.genErrorResult("验证码错误");
+        }
+    }
+
+    @GetMapping(value = "/logout")
+    public ResultDto logout() {
+        String token = request.getHeader("token");
+        if (!token.isEmpty()) {
+            Jedis jedis = jedisPool.getResource();
+            jedis.select(0);
+            jedis.setex(token, 0, "");
+        }
+        return Result.genSuccessResult();
     }
 }
