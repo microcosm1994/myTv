@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <el-container>
-      <el-aside width="100px"><Aside></Aside></el-aside>
+      <el-aside width="65px"><Aside></Aside></el-aside>
       <el-main>
         <router-view />
       </el-main>
@@ -41,6 +41,8 @@ export default defineComponent({
     }
     .el-main {
       height: 100%;
+      margin: 0;
+      padding: 0;
     }
   }
 }

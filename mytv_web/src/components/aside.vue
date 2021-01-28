@@ -1,11 +1,37 @@
 <template>
   <div class="aside">
     <div class="header">
-      <el-avatar shape="square" :src="squareUrl"></el-avatar>
+      <el-popover placement="right" :width="240" trigger="click">
+        <template #reference>
+          <el-avatar shape="square" :src="userInfo.avatar">{{
+            userInfo.nickName
+          }}</el-avatar>
+        </template>
+        <UserCard :user-info="userInfo"></UserCard>
+      </el-popover>
     </div>
     <div class="menu">
       <ul>
-        <li><i class="el-icon-user"></i></li>
+        <li>
+          <router-link to="/home"
+            ><i
+              :class="[
+                'el-icon-chat-dot-round',
+                { active: '/home/index' === currentRouteName }
+              ]"
+            ></i
+          ></router-link>
+        </li>
+        <li>
+          <router-link to="/home/friends"
+            ><i
+              :class="[
+                'el-icon-user',
+                { active: '/home/friends' === currentRouteName }
+              ]"
+            ></i
+          ></router-link>
+        </li>
         <li><i class="el-icon-video-camera"></i></li>
       </ul>
     </div>
@@ -18,18 +44,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import UserCard from '@/components/userCard.vue';
 
 export default defineComponent({
-  name: 'Aside'
+  name: 'Aside',
+  components: { UserCard },
+  setup() {
+    // 获取用户信息
+    const store = useStore();
+    const userInfo = computed(() => store.getters.userInfo);
+
+    // 获取路由信息
+    const router = useRouter();
+    const currentRouteName = computed(() => router.currentRoute.value.path);
+
+    return { userInfo, currentRouteName };
+  }
 });
 </script>
 <style lang="less" scoped>
 .aside {
   width: 65px;
   height: 100%;
-  background: rgb(54, 54, 54);
-  padding-top: 20px;
+  background: #25292c;
+  padding-top: 10px;
   padding-bottom: 150px;
   position: relative;
   .header {
@@ -46,7 +87,7 @@ export default defineComponent({
         height: 65px;
         padding: 17px 17px;
         .active {
-          color: #fff;
+          color: #07c160;
         }
         i {
           cursor: pointer;

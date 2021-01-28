@@ -32,6 +32,7 @@ export default {
     }
   },
   getters: {
-    token: (state) => state.token
+    token: (state) => state.token,
+    userInfo: (state) => state.userInfo
   }
 };

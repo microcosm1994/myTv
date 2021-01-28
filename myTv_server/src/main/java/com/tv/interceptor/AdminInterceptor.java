@@ -1,7 +1,6 @@
 package com.tv.interceptor;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import redis.clients.jedis.Jedis;
@@ -27,11 +26,11 @@ public class AdminInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object arg2) throws Exception {
         String token = request.getHeader("token");
-        if (!StringUtils.isEmpty(token)) {
+        if (!token.isEmpty()) {
             Jedis jedis = jedisPool.getResource();
             jedis.select(0);
             String tokenJsonValue = jedis.get(token);
-            if (!StringUtils.isEmpty(tokenJsonValue)) {
+            if (!tokenJsonValue.isEmpty()) {
                 return true;
             } else {
                 response.sendError(401, "登陆状态已过期，请重新登陆。");

@@ -84,8 +84,10 @@ public class SysUserController {
         SysUserDto user = sysUserService.getUser(userName);
         if (user != null) {
             Map data = new HashMap();
+            data.put("id", user.getId());
             data.put("userName", user.getUserName());
             data.put("nickName", user.getNickName());
+            data.put("avatar", user.getAvatar());
             return Result.genSuccessResult(data);
         } else {
             return Result.genErrorResult("验证码错误");
@@ -101,5 +103,21 @@ public class SysUserController {
             jedis.setex(token, 0, "");
         }
         return Result.genSuccessResult();
+    }
+
+    @PostMapping(value = "/search")
+    public ResultDto searchUser(@RequestBody SysUserDto userData) {
+        // 获取用户数据
+        SysUserDto user = sysUserService.getUser(userData.getUserName());
+        if (user != null) {
+            Map data = new HashMap();
+            data.put("id", user.getId());
+            data.put("userName", user.getUserName());
+            data.put("nickName", user.getNickName());
+            data.put("avatar", user.getAvatar());
+            return Result.genSuccessResult(data);
+        } else {
+            return Result.genErrorResult("没有此用户");
+        }
     }
 }

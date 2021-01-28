@@ -20,12 +20,18 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/home',
     name: 'Home',
+    redirect: '/home/index',
     component: () => import(/* home页: "home" */ '../views/Home.vue'),
     children: [
       {
-        path: '',
+        path: 'index',
         name: 'About',
-        component: () => import(/* about页: "about" */ '../views/About.vue'),
+        component: () => import(/* about页: "about" */ '../views/About.vue')
+      },
+      {
+        path: 'friends',
+        name: 'Friends',
+        component: () => import(/* friends页面: "friends" */ '../views/friends/index.vue')
       }
     ]
   }

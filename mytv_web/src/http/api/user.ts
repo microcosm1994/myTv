@@ -41,3 +41,14 @@ export function logout() {
     method: 'get'
   });
 }
+
+/**
+ * 查询用户
+ */
+export function searchUserInfo(data) {
+  return request({
+    url: '/user/search',
+    method: 'post',
+    data
+  });
+}

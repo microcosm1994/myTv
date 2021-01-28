@@ -15,4 +15,5 @@ public class SysUserDto {
 
     private String nickName;
     private String passWord;
+    private String avatar;
 }
