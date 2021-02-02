@@ -10,12 +10,7 @@
             </template>
           </el-input>
         </div>
-        <el-popover placement="bottom" :width="240" trigger="click">
-          <template #reference>
-            <div class="btn">+</div>
-          </template>
-          <AddFriends></AddFriends>
-        </el-popover>
+        <AddFriends></AddFriends>
       </div>
       <!-- 新的朋友 -->
       <div class="new active">
@@ -50,7 +45,7 @@
 import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import NewFriendsList from './newFriendsList.vue';
-import AddFriends from './addFriends.vue'
+import AddFriends from './addFriends.vue';
 
 export default defineComponent({
   name: 'Friends',
@@ -92,27 +87,6 @@ export default defineComponent({
           .el-input__inner {
             background: #dcd9d8;
           }
-        }
-      }
-      .btn {
-        display: inline-block;
-        vertical-align: middle;
-        width: 15%;
-        height: 25px;
-        background: #dcd9d8;
-        color: #999;
-        line-height: 25px;
-        text-align: center;
-        border-radius: 4px;
-        overflow: hidden;
-        cursor: pointer;
-        margin-left: 5px;
-        font-size: 16px;
-        &:hover {
-          background: #d1d1d1;
-        }
-        &:active {
-          background: #dcd9d8;
         }
       }
     }

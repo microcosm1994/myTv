@@ -10,6 +10,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @Service
 public class SysUserService {
@@ -45,7 +46,14 @@ public class SysUserService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String pwd = encoder.encode(userInfo.getPassWord());
         userInfo.setPassWord(pwd);
-        return sysUserDao.insert(userInfo);
+        int num = 0;
+        try {
+            num = sysUserDao.insert(userInfo);
+        } catch (Exception err) {
+            num = 0;
+        } finally {
+            return num;
+        }
     }
 
     /**

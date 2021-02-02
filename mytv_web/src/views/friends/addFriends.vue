@@ -1,7 +1,20 @@
 <template>
-  <div class="addFriends">
+  <el-popover
+    placement="bottom"
+    :width="240"
+    trigger="click"
+    @hide="clearUserInfo"
+  >
+    <template #reference>
+      <div class="addFriends">+</div>
+    </template>
     <div class="search">
-      <el-input size="mini" placeholder="输入账号" v-model="searchVal">
+      <el-input
+        size="mini"
+        placeholder="输入账号"
+        v-model="searchVal"
+        @keyup.enter="searchUser"
+      >
         <template #prefix>
           <i class="el-input__icon el-icon-search"></i>
         </template>
@@ -11,57 +24,143 @@
       </el-input>
     </div>
     <div class="result">
-      <UserCard v-if="userCardShow" :user-info="userInfo"></UserCard>
-      <div v-else>该用户不存在</div>
-      <div>{{ userInfo }}</div>
+      <div v-if="userCardShow">
+        <UserCard :user-info="userInfo"></UserCard>
+        <div class="addBtn">
+          <el-button size="mini" type="primary" @click="addFriends"
+            >添加好友</el-button
+          >
+        </div>
+      </div>
+      <div v-if="errorMsg">{{ errorMsg }}</div>
     </div>
-  </div>
+  </el-popover>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  reactive,
+  ref,
+  toRefs,
+  Ref,
+  watch
+} from 'vue';
+import { useStore } from 'vuex';
 import UserCard from '@/components/userCard.vue';
 import { searchUserInfo } from '@/http/api/user';
+import { addFriendsAsk } from '@/http/api/friends';
 
 export default defineComponent({
   name: 'AddFriends',
   components: { UserCard },
   setup() {
+    const store = useStore();
+    // 获取user信息
+    const user = computed(() => store.getters.userInfo);
+    /**
+     * 搜索用户
+     */
     const userCardShow = ref(false);
-    let userInfo = reactive({});
+    const errorMsg = ref('');
+    const state = reactive({
+      userInfo: {}
+    });
     // 搜索用户
-    const searchVal = ref('');
+    const searchVal: Ref<string> = ref('');
     const searchUser = () => {
-      searchUserInfo({ userName: searchVal.value }).then((res: any) => {
+      state.userInfo = {};
+      searchUserInfo({ userName: searchVal.value.trim() }).then((res: any) => {
         if (res.code === 1) {
+          state.userInfo = res.data;
           userCardShow.value = true;
-          userInfo = res.data;
-          console.log(userInfo)
         } else {
           userCardShow.value = false;
+          errorMsg.value = res.msg;
+        }
+      });
+    };
+    // 清除用户信息
+    const clearUserInfo = () => {
+      state.userInfo = {};
+      searchVal.value = '';
+    };
+    watch(searchVal, () => {
+      state.userInfo = {};
+      userCardShow.value = false;
+    });
+
+    /**
+     * 添加用户
+     */
+    const { ctx }: any = getCurrentInstance();
+    const addFriends = () => {
+      addFriendsAsk({
+        sourceId: user.value.id,
+        targetId: state.userInfo['id']
+      }).then((res: any) => {
+        if (res.code === 1) {
+          ctx.$notify({
+            title: '添加好友',
+            message: '好友申请已发送',
+            type: 'success'
+          });
+        } else {
+          ctx.$notify({
+            title: '添加好友',
+            message: '好友申请发送失败',
+            type: 'error'
+          });
         }
       });
     };
 
     return {
       userCardShow,
+      errorMsg,
       searchVal,
-      userInfo,
-      searchUser
+      searchUser,
+      clearUserInfo,
+      ...toRefs(state),
+      addFriends
     };
   }
 });
 </script>
 <style lang="less" scoped>
 .addFriends {
-  width: 100%;
-  .search {
-    width: 100%;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e2e2e2;
+  display: inline-block;
+  vertical-align: middle;
+  width: 15%;
+  height: 25px;
+  background: #dcd9d8;
+  color: #999;
+  line-height: 25px;
+  text-align: center;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 16px;
+  &:hover {
+    background: #d1d1d1;
   }
-  .result {
+  &:active {
+    background: #dcd9d8;
+  }
+}
+.search {
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e2e2;
+}
+.result {
+  width: 100%;
+  padding-top: 10px;
+  .addBtn {
     width: 100%;
-    padding-top: 10px;
+    text-align: center;
   }
 }
 </style>

@@ -1,19 +1,17 @@
 package com.tv.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-@TableName("sys_users")
 @Data
-public class SysUserDto {
+@TableName("friends_ask")
+public class FriendsAskDto {
     @TableId(type = IdType.AUTO)
-    private Integer Id;
-
-    private String userName;
-
-    private String nickName;
-    private String passWord;
-    private String avatar;
+    private Integer id;
+    private Integer sourceId;
+    private Integer targetId;
+    private Integer status;
 }

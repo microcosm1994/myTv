@@ -2,31 +2,55 @@
   <div class="newFriendsList">
     <div class="header">新的朋友</div>
     <div class="list">
-      <div class="card">
+      <div class="card" v-for="item in askList" :key="item['id']">
         <div class="avatar">
-          <el-avatar :size="50" shape="square" src="userInfo.avatar"></el-avatar>
+          <el-avatar
+            :size="50"
+            shape="square"
+            :src="item['targetInfo']['avatar']"
+          ></el-avatar>
         </div>
         <div class="info">
-          <div class="name">AAAA飞飞</div>
-          <div class="msg">我是AAAA</div>
+          <div class="name">{{ item['targetInfo']['userName'] }}</div>
+          <div class="msg">申请添加您为好友</div>
         </div>
-        <div class="status">同意</div>
+        <div class="status" v-if="item['status'] === 1">同意</div>
+        <div class="status" v-else>
+          <el-button size="mini" type="primary">同意</el-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from 'vue';
+import { defineComponent, computed, reactive, onMounted, toRefs } from 'vue';
 import { useStore } from 'vuex';
+import { getFriendsAsk } from '@/http/api/friends';
 
 export default defineComponent({
   name: 'NewFriendsList',
   setup() {
     const store = useStore();
-    const userInfo = computed(() => store.getters.userInfo);
-
-    return { userInfo };
+    const userInfo: any = computed(() => store.getters.userInfo);
+    const state = reactive({
+      askList: []
+    });
+    /**
+     * 获取请求列表
+     */
+    const getFriendsAskList = () => {
+      state.askList = [];
+      getFriendsAsk({ targetId: userInfo.value.id }).then((res: any) => {
+        if (res.code === 1) {
+          state.askList = res.data;
+        }
+      });
+    };
+    onMounted(() => {
+      getFriendsAskList();
+    });
+    return { userInfo, ...toRefs(state), getFriendsAskList };
   }
 });
 </script>

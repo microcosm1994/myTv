@@ -110,12 +110,8 @@ public class SysUserController {
         // 获取用户数据
         SysUserDto user = sysUserService.getUser(userData.getUserName());
         if (user != null) {
-            Map data = new HashMap();
-            data.put("id", user.getId());
-            data.put("userName", user.getUserName());
-            data.put("nickName", user.getNickName());
-            data.put("avatar", user.getAvatar());
-            return Result.genSuccessResult(data);
+            user.setPassWord(null);
+            return Result.genSuccessResult(user);
         } else {
             return Result.genErrorResult("没有此用户");
         }
