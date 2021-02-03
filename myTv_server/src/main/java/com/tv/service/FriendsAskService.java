@@ -3,6 +3,7 @@ package com.tv.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tv.dao.FriendsAskDao;
 import com.tv.entity.FriendsAskDto;
+import com.tv.entity.FriendsDto;
 import com.tv.entity.SysUserDto;
 import com.tv.vo.FriendsAskVo;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import java.util.Map;
 public class FriendsAskService {
     @Resource
     FriendsAskDao friendsAskDao;
+
+    @Resource
+    FriendsService friendsService;
 
     // 添加新的好友请求
     public int addFriendsAsk(FriendsAskDto askData) {
@@ -51,6 +55,18 @@ public class FriendsAskService {
 //        map.put("target_id", askData.getTargetId());
 //        wrapper.allEq(map, false);
         return friendsAskDao.selectAskList(askData);
+    }
+
+    // 修改好友请求状态
+    public int putFriendsAsk(FriendsAskDto askData) {
+        int num = friendsAskDao.updateById(askData);
+        if (num > 0) {
+            FriendsDto friendsData = new FriendsDto();
+            friendsData.setTId(askData.getTargetId());
+            friendsData.setSId(askData.getSourceId());
+            return friendsService.addFriends(friendsData);
+        }
+        return 0;
     }
 
 }

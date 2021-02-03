@@ -43,4 +43,14 @@ public class FriendsAskController {
         }
         return Result.genErrorResult();
     }
+
+    // 修改好友请求状态
+    @PostMapping(value = "/put")
+    public ResultDto putFriendsAsk(@RequestBody FriendsAskDto askData){
+        int num = friendsAskService.putFriendsAsk(askData);
+        if (num > 0) {
+            return Result.genSuccessResult();
+        }
+        return Result.genErrorResult();
+    }
 }

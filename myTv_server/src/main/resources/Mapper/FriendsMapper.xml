@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tv.dao.FriendsDao">
+    <resultMap id="friendsMap" type="com.tv.vo.FriendsVo">
+        <id property="id" column="id"></id>
+        <result property="sId" column="s_id"></result>
+        <result property="tId" column="t_id"></result>
+        <result property="relation" column="relation"></result>
+        <result property="del" column="del"></result>
+        <association property="sourceInfo" javaType="com.tv.entity.SysUserDto" columnPrefix="sourceInfo_">
+            <id property="id" column="id"></id>
+            <result property="userName" column="userName"/>
+            <result property="nickName" column="nickName"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+        <association property="targetInfo" javaType="com.tv.entity.SysUserDto" columnPrefix="targetInfo_">
+            <id property="id" column="id"></id>
+            <result property="userName" column="userName"/>
+            <result property="nickName" column="nickName"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+    </resultMap>
+    <select id="getList" parameterType="com.tv.entity.SysUserDto" resultMap="friendsMap">
+        select friends.*,
+        sourceInfo.id as sourceInfo_id,
+        sourceInfo.nick_name as sourceInfo_nickName,
+        sourceInfo.user_name as sourceInfo_userName,
+        sourceInfo.avatar as sourceInfo_avatar,
+        targetInfo.id as targetInfo_id,
+        targetInfo.nick_name as targetInfo_nickName,
+        targetInfo.user_name as targetInfo_userName,
+        targetInfo.avatar as targetInfo_avatar
+        from friends
+        left join sys_users as sourceInfo on sourceInfo.id=friends.s_id
+        left join sys_users as targetInfo on targetInfo.id=friends.t_id
+        where friends.del=0
+        and friends.relation=0
+        or friends.t_id=#{data.id}
+        or friends.s_id=#{data.id}
+    </select>
+</mapper>

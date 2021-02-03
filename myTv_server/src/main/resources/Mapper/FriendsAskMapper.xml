@@ -8,21 +8,21 @@
         <result property="sourceId" column="source_id"></result>
         <result property="targetId" column="target_id"></result>
         <result property="status" column="status"></result>
-        <association property="targetInfo" javaType="com.tv.entity.SysUserDto" columnPrefix="targetInfo_">
+        <association property="sourceInfo" javaType="com.tv.entity.SysUserDto" columnPrefix="sourceInfo_">
             <id property="id" column="id"></id>
-            <result property="userName" column="user_name"/>
-            <result property="nickName" column="nick_name"/>
+            <result property="userName" column="userName"/>
+            <result property="nickName" column="nickName"/>
             <result property="avatar" column="avatar"/>
         </association>
     </resultMap>
     <select id="selectAskList" parameterType="com.tv.entity.FriendsAskDto" resultMap="askMap">
         select friends_ask.*,
-        targetInfo.id as targetInfo_id,
-        targetInfo.nick_name as targetInfo_nick_name,
-        targetInfo.user_name as targetInfo_user_name,
-        targetInfo.avatar as targetInfo_avatar
+        sourceInfo.id as sourceInfo_id,
+        sourceInfo.nick_name as sourceInfo_nickName,
+        sourceInfo.user_name as sourceInfo_userName,
+        sourceInfo.avatar as sourceInfo_avatar
         from friends_ask
-        left join sys_users as targetInfo on friends_ask.target_id=targetInfo.id
+        left join sys_users as sourceInfo on friends_ask.source_id=sourceInfo.id
         where
         <if test="askData.targetId != null">
             friends_ask.target_id=#{askData.targetId}

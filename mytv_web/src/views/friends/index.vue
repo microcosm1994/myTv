@@ -22,15 +22,29 @@
       <!-- 好友列表 -->
       <div class="list">
         <div class="title">A</div>
-        <div class="card">
+        <div class="card" v-for="item in friendsList" :key="item['id']">
           <div class="avatar">
             <el-avatar
+              v-if="userInfo.id !== item['sourceInfo']['id']"
               size="small"
               shape="square"
-              src="userInfo.avatar"
-            ></el-avatar>
+              :src="item['sourceInfo']['avatar']"
+              >{{ item['sourceInfo']['nickName'] }}</el-avatar
+            >
+            <el-avatar
+              v-if="userInfo.id !== item['targetInfo']['id']"
+              size="small"
+              shape="square"
+              :src="item['targetInfo']['avatar']"
+              >{{ item['targetInfo']['nickName'] }}</el-avatar
+            >
           </div>
-          <div class="name">AAA开发1</div>
+          <div v-if="userInfo.id !== item['sourceInfo']['id']" class="name">
+            {{ item['sourceInfo']['nickName'] }}
+          </div>
+          <div v-if="userInfo.id !== item['targetInfo']['id']" class="name">
+            {{ item['targetInfo']['nickName'] }}
+          </div>
         </div>
       </div>
     </div>
@@ -42,25 +56,52 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from 'vue';
+import {
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
+  reactive,
+  toRefs
+} from 'vue';
 import { useStore } from 'vuex';
 import NewFriendsList from './newFriendsList.vue';
 import AddFriends from './addFriends.vue';
+import { getFriendsList as get } from '@/http/api/friends';
 
 export default defineComponent({
   name: 'Friends',
   components: { NewFriendsList, AddFriends },
   setup() {
     const store = useStore();
-    const userInfo = computed(() => store.getters.userInfo);
+    const userInfo: any = computed(() => store.getters.userInfo);
     // 右边组件
     const currentComponentName = 'NewFriendsList';
+    const state = reactive({
+      friendsList: []
+    });
     /**
      * 搜索
      */
     const searchVal = ref('');
+    /**
+     * 获取好友列表
+     */
+    const getFriendsList = () => {
+      state.friendsList = [];
+      get({
+        id: userInfo.value.id
+      }).then((res: any) => {
+        if (res.code === 1) {
+          state.friendsList = res.data;
+        }
+      });
+    };
 
-    return { currentComponentName, userInfo, searchVal };
+    onMounted(() => {
+      getFriendsList();
+    });
+    return { currentComponentName, userInfo, searchVal, ...toRefs(state) };
   }
 });
 </script>

@@ -2,21 +2,27 @@
   <div class="newFriendsList">
     <div class="header">新的朋友</div>
     <div class="list">
+      <div v-if="askList.length === 0" class="emptyCard">
+        没有好友申请
+      </div>
       <div class="card" v-for="item in askList" :key="item['id']">
         <div class="avatar">
           <el-avatar
             :size="50"
             shape="square"
-            :src="item['targetInfo']['avatar']"
-          ></el-avatar>
+            :src="item['sourceInfo']['avatar']"
+            >{{
+              item['sourceInfo']['nickName'] || item['sourceInfo']['userName']
+            }}</el-avatar
+          >
         </div>
         <div class="info">
-          <div class="name">{{ item['targetInfo']['userName'] }}</div>
+          <div class="name">{{ item['sourceInfo']['userName'] }}</div>
           <div class="msg">申请添加您为好友</div>
         </div>
-        <div class="status" v-if="item['status'] === 1">同意</div>
+        <div class="status" v-if="item['status'] === 1">已同意</div>
         <div class="status" v-else>
-          <el-button size="mini" type="primary">同意</el-button>
+          <el-button size="mini" type="primary" @click="agree(item)">同意</el-button>
         </div>
       </div>
     </div>
@@ -26,7 +32,7 @@
 <script lang="ts">
 import { defineComponent, computed, reactive, onMounted, toRefs } from 'vue';
 import { useStore } from 'vuex';
-import { getFriendsAsk } from '@/http/api/friends';
+import { getFriendsAsk, putFriendsAsk } from '@/http/api/friends';
 
 export default defineComponent({
   name: 'NewFriendsList',
@@ -47,10 +53,25 @@ export default defineComponent({
         }
       });
     };
+    /**
+     * 同意好友申请
+     */
+    const agree = (data) => {
+      putFriendsAsk({
+        id: data.id,
+        sourceId: data.sourceId,
+        targetId: data.targetId,
+        status: 1
+      }).then((res: any) => {
+        if (res.code === 1) {
+          data.status = 1
+        }
+      });
+    };
     onMounted(() => {
       getFriendsAskList();
     });
-    return { userInfo, ...toRefs(state), getFriendsAskList };
+    return { userInfo, ...toRefs(state), getFriendsAskList, agree };
   }
 });
 </script>
@@ -71,6 +92,14 @@ export default defineComponent({
   .list {
     width: 300px;
     margin: 0 auto;
+    .emptyCard {
+      width: 100%;
+      height: 70px;
+      line-height: 70px;
+      padding-left: 10px;
+      color: #999;
+      border-bottom: 1px solid #e2e2e2;
+    }
     .card {
       width: 100%;
       height: 70px;
