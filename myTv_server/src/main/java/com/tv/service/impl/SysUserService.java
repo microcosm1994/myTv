@@ -1,8 +1,10 @@
-package com.tv.service;
+package com.tv.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tv.dao.SysUserDao;
 import com.tv.entity.SysUserDto;
+import com.tv.service.FriendsService;
+import com.tv.service.SysUserServiceImpl;
 import com.tv.utils.AuthUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,12 +12,15 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
-import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
-public class SysUserService {
+public class SysUserService implements SysUserServiceImpl {
     @Resource
     private SysUserDao sysUserDao;
+    @Resource
+    private FriendsService friendsService;
     @Resource
     private JedisPool jedisPool;
 
@@ -59,10 +64,33 @@ public class SysUserService {
     /**
      * 获取用户信息
      */
+    @Override
+    public Map getUser(String userName, String token) {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("user_name", userName);
+        SysUserDto userInfo = sysUserDao.selectOne(queryWrapper);
+        // 查询是否好友关系
+        Map data = new HashMap();
+        Map tokenValue = AuthUtils.getTokenValue(token);
+        data.put("userId", tokenValue.get("id"));
+        data.put("friendsId", userInfo.getId());
+        int num = friendsService.isFriends(data);
+        Map user = new HashMap();
+        user.put("id", userInfo.getId());
+        user.put("userName", userInfo.getUserName());
+        user.put("nickName", userInfo.getNickName());
+        user.put("avatar", userInfo.getAvatar());
+        user.put("isFriends", num);
+        return user;
+    }
+    /**
+     * 获取用户信息
+     */
+    @Override
     public SysUserDto getUser(String userName) {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("user_name", userName);
-        SysUserDto user = sysUserDao.selectOne(queryWrapper);
-        return user;
+        SysUserDto userInfo = sysUserDao.selectOne(queryWrapper);
+        return userInfo;
     }
 }

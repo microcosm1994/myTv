@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.tv.entity.ResultDto;
 import com.tv.entity.SysUserDto;
 import com.google.code.kaptcha.Constants;
-import com.tv.service.SysUserService;
+import com.tv.service.FriendsService;
+import com.tv.service.impl.SysUserService;
 import com.tv.utils.Result;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,6 @@ import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +28,9 @@ public class SysUserController {
     private HttpSession session;
     @Resource
     private SysUserService sysUserService;
+
+    @Resource
+    private FriendsService friendsService;
     @Resource
     private JedisPool jedisPool;
 
@@ -108,9 +111,9 @@ public class SysUserController {
     @PostMapping(value = "/search")
     public ResultDto searchUser(@RequestBody SysUserDto userData) {
         // 获取用户数据
-        SysUserDto user = sysUserService.getUser(userData.getUserName());
+        String token = request.getHeader("token");
+        Map user = sysUserService.getUser(userData.getUserName(), token);
         if (user != null) {
-            user.setPassWord(null);
             return Result.genSuccessResult(user);
         } else {
             return Result.genErrorResult("没有此用户");

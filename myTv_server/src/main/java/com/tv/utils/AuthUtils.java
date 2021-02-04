@@ -1,14 +1,20 @@
 package com.tv.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.tv.entity.SysUserDto;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AuthUtils {
+    @Resource
+    private JedisPool jedisPool;
     /**
      * 生成token
      *
@@ -35,35 +41,20 @@ public class AuthUtils {
     }
 
     /**
-     * 获取ip
+     * 根据token获取用户信息
+     *
+     * @param token    token
      */
-    public static String getIp(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknow".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-            if (ip.equals("127.0.0.1")) {
-                //根据网卡取本机配置的IP
-                InetAddress inet = null;
-                try {
-                    inet = InetAddress.getLocalHost();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                ip = inet.getHostAddress();
-            }
-        }
-        // 多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-        if (ip != null && ip.length() > 15) {
-            if (ip.indexOf(",") > 0) {
-                ip = ip.substring(0, ip.indexOf(","));
-            }
-        }
-        return ip;
+    public static Map getTokenValue(String token) {
+        JedisPool jedisPool = new JedisPool();
+        Jedis jedis = jedisPool.getResource();
+        jedis.select(0);
+        String tokenValue = jedis.get(token);
+        String id = JSONObject.parseObject(tokenValue).getString("id");
+        String userName = JSONObject.parseObject(tokenValue).getString("userName");
+        Map data = new HashMap();
+        data.put("id", id);
+        data.put("userName", userName);
+        return data;
     }
 }
