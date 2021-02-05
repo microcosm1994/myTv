@@ -26,9 +26,17 @@
     <div class="result">
       <div v-if="userCardShow">
         <UserCard :user-info="userInfo"></UserCard>
-        <div class="addBtn">
+        <div
+          class="addBtn"
+          v-if="userInfo['isFriends'] === 0 && userInfo['id'] !== user.id"
+        >
           <el-button size="mini" type="primary" @click="addFriends"
             >添加好友</el-button
+          >
+        </div>
+        <div class="addBtn" v-if="userInfo['isFriends'] === 1">
+          <el-button size="mini" type="primary" @click="addFriends"
+            >发消息</el-button
           >
         </div>
       </div>
@@ -71,6 +79,7 @@ export default defineComponent({
     const searchVal: Ref<string> = ref('');
     const searchUser = () => {
       state.userInfo = {};
+      userCardShow.value = false;
       searchUserInfo({ userName: searchVal.value.trim() }).then((res: any) => {
         if (res.code === 1) {
           state.userInfo = res.data;
@@ -117,6 +126,7 @@ export default defineComponent({
     };
 
     return {
+      user,
       userCardShow,
       errorMsg,
       searchVal,

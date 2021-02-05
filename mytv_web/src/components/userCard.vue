@@ -29,8 +29,9 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 .userCard {
-  width: 100%;
+  width: 214px;
   padding: 10px 15px;
+  margin: 0 auto;
   .header {
     width: 100%;
     .info {

@@ -13,7 +13,10 @@
         <AddFriends></AddFriends>
       </div>
       <!-- 新的朋友 -->
-      <div class="new active">
+      <div
+        :class="['new', menuIndex === 0 ? 'active' : '']"
+        @click="componentsSwitch('NewFriendsList', 0)"
+      >
         <div class="icon">
           <i class="el-icon-s-custom"></i>
         </div>
@@ -22,7 +25,19 @@
       <!-- 好友列表 -->
       <div class="list">
         <div class="title">A</div>
-        <div class="card" v-for="item in friendsList" :key="item['id']">
+        <div
+          :class="['card', menuIndex === index + 1 ? 'active' : '']"
+          v-for="(item, index) in friendsList"
+          :key="item['id']"
+          @click="getFriendsInfo(item, index + 1)"
+          @dblclick="
+            createMsg(
+              userInfo.id === item['targetInfo']['id']
+                ? item['sourceInfo']['id']
+                : item['targetInfo']['id']
+            )
+          "
+        >
           <div class="avatar">
             <el-avatar
               v-if="userInfo.id !== item['sourceInfo']['id']"
@@ -50,7 +65,10 @@
     </div>
     <!-- 右边详细内容 -->
     <div class="right">
-      <component :is="currentComponentName"></component>
+      <component
+        :is="currentComponentName"
+        :user-info="friendsInfo"
+      ></component>
     </div>
   </div>
 </template>
@@ -65,21 +83,36 @@ import {
   toRefs
 } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import NewFriendsList from './newFriendsList.vue';
 import AddFriends from './addFriends.vue';
+import UserCard from '@/components/userCard.vue';
 import { getFriendsList as get } from '@/http/api/friends';
+import { create } from '@/http/api/msg';
 
 export default defineComponent({
   name: 'Friends',
-  components: { NewFriendsList, AddFriends },
+  components: { NewFriendsList, AddFriends, UserCard },
   setup() {
     const store = useStore();
+    const router = useRouter();
     const userInfo: any = computed(() => store.getters.userInfo);
-    // 右边组件
-    const currentComponentName = 'NewFriendsList';
     const state = reactive({
-      friendsList: []
+      friendsList: [], // 好友列表
+      friendsInfo: {} // 好友信息
     });
+    /**
+     * 菜单切换
+     */
+    // 右边组件
+    const currentComponentName = ref('NewFriendsList');
+    const menuIndex = ref(0);
+    const componentsSwitch = (componentName: string, index: number) => {
+      currentComponentName.value = componentName;
+      menuIndex.value = index;
+      console.log(menuIndex.value);
+    };
+
     /**
      * 搜索
      */
@@ -98,10 +131,46 @@ export default defineComponent({
       });
     };
 
+    /**
+     * 点击查看好友信息
+     */
+    const getFriendsInfo = (data: any, index: number) => {
+      componentsSwitch('UserCard', index);
+      if (userInfo.value.id === data.sourceInfo.id) {
+        state.friendsInfo = data.targetInfo;
+      } else {
+        state.friendsInfo = data.sourceInfo;
+      }
+    };
+
+    /**
+     * 双击新建聊天
+     */
+    const createMsg = (id: number) => {
+      create({
+        type: 0,
+        sid: userInfo.value.id,
+        tid: id
+      }).then((res: any) => {
+        if (res.code === 1) {
+          router.push('/home');
+        }
+      });
+    };
+
     onMounted(() => {
       getFriendsList();
     });
-    return { currentComponentName, userInfo, searchVal, ...toRefs(state) };
+    return {
+      currentComponentName,
+      menuIndex,
+      componentsSwitch,
+      userInfo,
+      searchVal,
+      ...toRefs(state),
+      getFriendsInfo,
+      createMsg
+    };
   }
 });
 </script>
@@ -139,6 +208,10 @@ export default defineComponent({
       height: 50px;
       padding-top: 10px;
       padding-left: 10px;
+      cursor: pointer;
+      &:hover {
+        background: #dfdddb;
+      }
       .icon {
         display: inline-block;
         vertical-align: middle;
@@ -177,6 +250,9 @@ export default defineComponent({
         padding-left: 40px;
         padding-top: 10px;
         cursor: pointer;
+        &:hover {
+          background: #dfdddb;
+        }
         .avatar {
           display: inline-block;
           vertical-align: middle;

@@ -69,11 +69,12 @@ public class SysUserService implements SysUserServiceImpl {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("user_name", userName);
         SysUserDto userInfo = sysUserDao.selectOne(queryWrapper);
-        // 查询是否好友关系
+        // 获取token value
         Map data = new HashMap();
         Map tokenValue = AuthUtils.getTokenValue(token);
         data.put("userId", tokenValue.get("id"));
         data.put("friendsId", userInfo.getId());
+        // 查询是否好友关系
         int num = friendsService.isFriends(data);
         Map user = new HashMap();
         user.put("id", userInfo.getId());
