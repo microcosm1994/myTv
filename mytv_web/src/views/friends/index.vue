@@ -80,7 +80,8 @@ import {
   ref,
   onMounted,
   reactive,
-  toRefs
+  toRefs,
+  getCurrentInstance
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -96,11 +97,13 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const router = useRouter();
+    const { ctx }: any = getCurrentInstance();
     const userInfo: any = computed(() => store.getters.userInfo);
     const state = reactive({
       friendsList: [], // 好友列表
       friendsInfo: {} // 好友信息
     });
+
     /**
      * 菜单切换
      */
@@ -147,15 +150,18 @@ export default defineComponent({
      * 双击新建聊天
      */
     const createMsg = (id: number) => {
-      create({
-        type: 0,
-        sid: userInfo.value.id,
-        tid: id
-      }).then((res: any) => {
-        if (res.code === 1) {
-          router.push('/home');
-        }
-      });
+      console.log(ctx.$socket)
+      ctx.$socket.io.emit('chatevent', '你好');
+      return false;
+      // create({
+      //   type: 0,
+      //   sid: userInfo.value.id,
+      //   tid: id
+      // }).then((res: any) => {
+      //   if (res.code === 1) {
+      //     router.push('/home');
+      //   }
+      // });
     };
 
     onMounted(() => {

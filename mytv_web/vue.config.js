@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: './', 
+  publicPath: './',
   devServer: {
     open: true,
     overlay: {
@@ -14,6 +14,15 @@ module.exports = {
         ws: true,
         pathRewrite: {
           '^/api': ''
+        }
+      },
+      '/socket.io/': {
+        ws: false,
+        target: 'http://127.0.0.1:9096/',
+        changeOrigin: true,
+        emulateJSON: true,
+        pathRewrite: {
+          '^/socket.io/': ' '
         }
       }
     }
